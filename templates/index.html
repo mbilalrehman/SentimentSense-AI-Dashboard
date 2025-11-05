@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentimentSense AI Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container {
+            max-height: 400px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+    <!-- ===== NAYA HEADER ===== -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex-shrink-0 flex items-center">
+                    <!-- Icon -->
+                    <svg class="h-8 w-auto text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c.1.121.166.26.166.411v.06a4.57 4.57 0 01-1.332 3.284A6.76 6.76 0 0112 8.75a6.76 6.76 0 01-4.427-1.673A4.57 4.57 0 016.24 3.793v-.06c0-.151.065-.29.166-.411C6.98 2.62 8.53 1.5 12 1.5c3.47 0 5.02 1.12 5.593 1.822zM21.75 12c0 .878-.22 1.704-.624 2.457A9.76 9.76 0 0112 18.75a9.76 9.76 0 01-9.126-4.293A7.51 7.51 0 012.25 12c0-.878.22-1.704.624-2.457A9.76 9.76 0 0112 5.25a9.76 9.76 0 019.126 4.293A7.51 7.51 0 0121.75 12z" />
+                    </svg>
+                    <span class="ml-2 text-xl font-bold text-indigo-600">SentimentSense AI</span>
+                </div>
+                <div class="flex items-center">
+                    <button id="nav-cta-button" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700">
+                        Get Started
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== NAYA LANDING PAGE (HERO SECTION) ===== -->
+    <div id="page-landing">
+        <div class="relative isolate overflow-hidden bg-white">
+            <div class="max-w-6xl mx-auto px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-24">
+                <div class="mx-auto max-w-2xl flex-shrink-0 lg:mx-0 lg:max-w-xl lg:pt-8">
+                    <h1 class="mt-10 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-6xl">
+                        Instantly Understand Your Customers.
+                    </h1>
+                    <p class="mt-6 text-lg leading-8 text-gray-600">
+                        Stop guessing, start knowing. Upload your customer reviews, support tickets, or survey results, and let our AI instantly tell you what people *really* think.
+                    </d>
+                    <div class="mt-10 flex items-center gap-x-6">
+                        <button id="hero-cta-button" class="rounded-md bg-indigo-600 px-8 py-3 text-lg font-semibold text-white shadow-lg hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                            Start Analyzing Now
+                        </button>
+                    </div>
+                </div>
+                <!-- Image Section -->
+                <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32">
+                    <div class="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
+                        <img src="https://placehold.co/600x400/3730a3/ffffff?text=Sentiment+Charts&font=inter" alt="App screenshot" width="2432" height="1442" class="w-[36rem] rounded-xl bg-white/5 shadow-2xl ring-1 ring-white/10">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== AAPKI PURANI APP (Ab hidden hai) ===== -->
+    <div id="page-app" class="hidden">
+        
+        <!-- Upload Section -->
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4">Upload Your Data</h2>
+                
+                <!-- Error Box -->
+                <div id="error-box" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+                    <strong class="font-bold">Error:</strong>
+                    <span id="error-message" class="block sm:inline"></span>
+                </div>
+
+                <!-- Upload Form -->
+                <form id="upload-form" class="space-y-4">
+                    <div>
+                        <label for="csv-file" class="block text-sm font-medium text-gray-700">1. Select CSV File:</label>
+                        <input type="file" id="csv-file" accept=".csv" class="mt-1 bg-gray-50 border border-gray-300 rounded-lg p-2 w-full">
+                    </div>
+                    <div>
+                        <label for="column-name" class="block text-sm font-medium text-gray-700">2. Enter Text Column Name (Exactly):</label>
+                        <input type="text" id="column-name" placeholder="e.g., review_text, comment, body" class="mt-1 bg-gray-50 border border-gray-300 rounded-lg p-2 w-full">
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-indigo-700 shadow-md">
+                            Analyze Now
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Section (Hidden by default) -->
+        <div id="results-section" class="hidden max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-24">
+            
+            <!-- Loader -->
+            <div id="loader" class="hidden text-center py-12">
+                <div class="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-4 text-lg font-medium text-gray-600">AI is analyzing... (This may take a moment)</p>
+            </div>
+
+            <!-- Dashboard -->
+            <div id="dashboard" class="hidden">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">Your Analysis Results</h2>
+                
+                <!-- Summary Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                        <h3 class="text-gray-500 font-medium">Total Rows in CSV</h3>
+                        <p id="total-rows" class="text-4xl font-bold text-indigo-600">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                        <h3 class="text-gray-500 font-medium">Rows Analyzed</h3>
+                        <p id="rows-analyzed" class="text-4xl font-bold text-green-600">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                        <h3 class="text-gray-500 font-medium">Empty/Invalid Rows</h3>
+                        <p id="rows-skipped" class="text-4xl font-bold text-red-600">0</p>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Pie Chart -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold mb-4 text-center">Sentiment Breakdown</h3>
+                        <div class="chart-container">
+                            <canvas id="pie-chart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Bar Chart -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold mb-4 text-center">Top 10 Common Keywords</h3>
+                        <div class="chart-container">
+                            <canvas id="bar-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- End #page-app -->
+
+    <script>
+        // --- PAGE SWITCHER LOGIC (NAYA ADD KIYA HAI) ---
+        const pageLanding = document.getElementById('page-landing');
+        const pageApp = document.getElementById('page-app');
+        const navCtaButton = document.getElementById('nav-cta-button');
+        const heroCtaButton = document.getElementById('hero-cta-button');
+
+        function showAppPage() {
+            pageLanding.classList.add('hidden');
+            pageApp.classList.remove('hidden');
+            window.scrollTo(0, 0); // Page k top par scroll karein
+        }
+
+        navCtaButton.addEventListener('click', showAppPage);
+        heroCtaButton.addEventListener('click', showAppPage);
+
+
+        // --- AAPKA PURANA APP LOGIC (Same as before) ---
+        const uploadForm = document.getElementById('upload-form');
+        const csvFile = document.getElementById('csv-file');
+        const columnName = document.getElementById('column-name');
+        
+        const resultsSection = document.getElementById('results-section');
+        const loader = document.getElementById('loader');
+        const dashboard = document.getElementById('dashboard');
+        
+        const errorBox = document.getElementById('error-box');
+        const errorMessage = document.getElementById('error-message');
+        
+        const totalRowsEl = document.getElementById('total-rows');
+        const rowsAnalyzedEl = document.getElementById('rows-analyzed');
+        const rowsSkippedEl = document.getElementById('rows-skipped');
+
+        let pieChartInstance = null;
+        let barChartInstance = null;
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+            
+            const file = csvFile.files[0];
+            const colName = columnName.value;
+
+            if (!file) {
+                showError('Please select a CSV file.');
+                return;
+            }
+            if (!colName) {
+                showError('Please enter the name of the text column.');
+                return;
+            }
+
+            hideError();
+            resultsSection.classList.remove('hidden');
+            dashboard.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('columnName', colName);
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'An unknown error occurred.');
+                }
+                
+                renderDashboard(data);
+
+            } catch (error) {
+                showError(error.message);
+                loader.classList.add('hidden');
+            }
+        });
+
+        function renderDashboard(data) {
+            totalRowsEl.textContent = data.total_rows;
+            rowsAnalyzedEl.textContent = data.rows_analyzed;
+            rowsSkippedEl.textContent = data.total_rows - data.rows_analyzed;
+            
+            if (pieChartInstance) {
+                pieChartInstance.destroy(); 
+            }
+            const pieCtx = document.getElementById('pie-chart').getContext('2d');
+            pieChartInstance = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Positive', 'Neutral', 'Negative'],
+                    datasets: [{
+                        data: [
+                            data.sentiment_counts.positive,
+                            data.sentiment_counts.neutral,
+                            data.sentiment_counts.negative
+                        ],
+                        backgroundColor: [
+                            'rgb(22, 163, 74)',  // Green
+                            'rgb(209, 213, 219)', // Gray
+                            'rgb(220, 38, 38)'   // Red
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                    }
+                }
+            });
+
+            if (barChartInstance) {
+                barChartInstance.destroy(); 
+            }
+            const barCtx = document.getElementById('bar-chart').getContext('2d');
+            barChartInstance = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.top_keywords),
+                    datasets: [{
+                        label: 'Word Count',
+                        data: Object.values(data.top_keywords),
+                        backgroundColor: 'rgba(79, 70, 229, 0.8)' // Indigo
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', 
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Top 10 Most Common Words (excluding stopwords)'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            loader.classList.add('hidden');
+            dashboard.classList.remove('hidden');
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorBox.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorBox.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
